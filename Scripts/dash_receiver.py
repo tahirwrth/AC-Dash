@@ -52,6 +52,8 @@ sock.setblocking(False)
 last_data_time = 0
 last_delta = 0
 delta_change = 0
+smoothed_change = 0.0
+alpha = 0.95
 last_gear, last_speed = "N", "0"
 smoothed_rpm, max_rpm = 0, 7000
 t_press, t_temps = [0.0]*4, [0]*4
@@ -96,8 +98,8 @@ while running:
 
             if last_data_time != 0:
                 diff = last_delta - new_delta
-                if abs(diff) < 0.5:
-                    delta_change = diff
+                if abs(diff) < 0.1:
+                    smoothed_change = (smoothed_change * alpha) + (diff * (1.0 - alpha))
             
             last_delta = new_delta
             current_delta = new_delta
@@ -143,16 +145,11 @@ while running:
 
         # delta change bar indicator
         bar_h = int(12 * H_SCALE)
-        bar_w = int(max(-WIDTH // 2, min(WIDTH // 2, delta_change * 4000 * W_SCALE)))
-
+        bar_w = int(max(-WIDTH // 2, min(WIDTH // 2, smoothed_change * 15000 * W_SCALE)))
+        
         if bar_w > 0: # gaining time
             pygame.draw.rect(screen, (0, 200, 0), (WIDTH // 2, HEIGHT - bar_h, bar_w, bar_h))
         elif bar_w < 0: # losing time
-            pygame.draw.rect(screen, (200, 0, 0), (WIDTH // 2 + bar_w, HEIGHT - bar_h, abs(bar_w), bar_h))
-
-        if bar_w > 0:
-            pygame.draw.rect(screen, (0, 200, 0), (WIDTH // 2, HEIGHT - bar_h, bar_w, bar_h))
-        elif bar_w < 0:
             pygame.draw.rect(screen, (200, 0, 0), (WIDTH // 2 + bar_w, HEIGHT - bar_h, abs(bar_w), bar_h))
 
         # speed reading
