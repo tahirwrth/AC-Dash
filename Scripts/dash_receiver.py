@@ -50,6 +50,8 @@ sock.setblocking(False)
 
 # dash state
 last_data_time = 0
+last_delta = 0
+delta_change = 0
 last_gear, last_speed = "N", "0"
 smoothed_rpm, max_rpm = 0, 7000
 t_press, t_temps = [0.0]*4, [0]*4
@@ -90,7 +92,16 @@ while running:
             raw_rpm, max_rpm = tele.get("rpm", 0), tele.get("max_rpm", 7000)
             t_press, t_temps = tele.get("p", [0.0]*4), tele.get("t", [0]*4)
             current_slip, pit_limiter = tele.get("slip", 0), tele.get("pl", 0)
-            current_delta = tele.get("d", 0.0)
+            new_delta = tele.get("d", 0.0)
+
+            if last_data_time != 0:
+                diff = last_delta - new_delta
+                if abs(diff) < 0.5:
+                    delta_change = diff
+            
+            last_delta = new_delta
+            current_delta = new_delta
+
             smoothed_rpm = (smoothed_rpm * 0.2) + (raw_rpm * 0.8)
             last_data_time = time.time()
         except: break
@@ -105,7 +116,7 @@ while running:
                 os.system("systemctl start emulationstation &")
                 running = False
 
-    screen.fill((5, 5, 5)) 
+    screen.fill((5, 5, 5))
 
     if time.time() - last_data_time < 2.0:
         # blinking slip indicators
@@ -114,7 +125,7 @@ while running:
             pygame.draw.rect(screen, (0, 120, 255), (WIDTH - int(35 * W_SCALE), int(100 * H_SCALE), int(15 * W_SCALE), int(280 * H_SCALE)))
 
         # rpm
-        arc_center = (WIDTH // 2, int(230 * H_SCALE)) 
+        arc_center = (WIDTH // 2, int(230 * H_SCALE))
         draw_rpm_arc(screen, arc_center, int(215 * SCALE), smoothed_rpm, max_rpm)
 
         # gear handling
@@ -122,7 +133,7 @@ while running:
         gx, gy = WIDTH // 2 - gear_surf.get_width() // 2, arc_center[1] - gear_surf.get_height() // 2 - int(15 * SCALE)
         screen.blit(gear_surf, (gx, gy))
         if pit_limiter:
-            pl_surf = font_pl.render("PL", True, (255, 255, 0)) 
+            pl_surf = font_pl.render("PL", True, (255, 255, 0))
             screen.blit(pl_surf, (gx - pl_surf.get_width() - int(15 * W_SCALE), arc_center[1] - pl_surf.get_height() // 2))
 
         # lap delta reading
@@ -130,10 +141,15 @@ while running:
         delta_surf = font_delta.render(f"{current_delta:+.2f}", True, delta_color)
         screen.blit(delta_surf, (WIDTH // 2 - delta_surf.get_width() // 2, int(310 * H_SCALE)))
 
-        # lap delta bar indicator
+        # delta change bar indicator
         bar_h = int(12 * H_SCALE)
-        bar_w = int(max(-WIDTH // 2, min(WIDTH // 2, -current_delta * 120 * W_SCALE)))
-        
+        bar_w = int(max(-WIDTH // 2, min(WIDTH // 2, delta_change * 4000 * W_SCALE)))
+
+        if bar_w > 0: # gaining time
+            pygame.draw.rect(screen, (0, 200, 0), (WIDTH // 2, HEIGHT - bar_h, bar_w, bar_h))
+        elif bar_w < 0: # losing time
+            pygame.draw.rect(screen, (200, 0, 0), (WIDTH // 2 + bar_w, HEIGHT - bar_h, abs(bar_w), bar_h))
+
         if bar_w > 0:
             pygame.draw.rect(screen, (0, 200, 0), (WIDTH // 2, HEIGHT - bar_h, bar_w, bar_h))
         elif bar_w < 0:
