@@ -26,7 +26,7 @@ except ImportError:
 PORT = 5005
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-def send_to_dash(ip, speed, gear, rpm, max_rpm, pressures, temps, max_slip, pit_lim, delta, is_invalid):
+def send_to_dash(ip, speed, gear, rpm, max_rpm, pressures, temps, max_slip, pit_lim, delta):
     try:
         message = json.dumps({
             "speed": speed, 
@@ -37,8 +37,7 @@ def send_to_dash(ip, speed, gear, rpm, max_rpm, pressures, temps, max_slip, pit_
             "t": temps,
             "slip": max_slip,
             "pl": pit_lim,
-            "d": delta,
-            "inv": is_invalid
+            "d": delta
         })
         sock.sendto(message.encode(), (ip, PORT))
     except:
@@ -56,7 +55,6 @@ def acUpdate(deltaT):
     speed = ac.getCarState(0, acsys.CS.SpeedMPH)
     gear_num = ac.getCarState(0, acsys.CS.Gear)
     rpm = ac.getCarState(0, acsys.CS.RPM)
-    is_invalid = 1 if ac.getCarState(0, acsys.CS.LapInvalidated) else 0
 
     if info:
         max_rpm = info.static.maxRpm
@@ -86,7 +84,7 @@ def acUpdate(deltaT):
 
     # send data to device with target IP specified in Content Manager
     ip = config.get("Settings", "IP_ADDRESS", fallback = "127.0.0.0")
-    send_to_dash(ip, int(speed), gear_str, int(rpm), int(max_rpm), pressures, temps, max_slip, is_pit_limiter, delta, is_invalid)
+    send_to_dash(ip, int(speed), gear_str, int(rpm), int(max_rpm), pressures, temps, max_slip, is_pit_limiter, delta)
 
 def acShutdown():
     global ser
