@@ -50,10 +50,9 @@ sock.setblocking(False)
 
 # dash state
 last_data_time = 0
-last_delta = 0
-delta_change = 0
-smoothed_change = 0.0
-alpha = 0.95
+last_delta = 0.0
+delta_history = [] # buffer for delta bar
+visual_bar_width = 0.0
 last_gear, last_speed = "N", "0"
 smoothed_rpm, max_rpm = 0, 7000
 t_press, t_temps = [0.0]*4, [0]*4
@@ -96,10 +95,13 @@ while running:
             current_slip, pit_limiter = tele.get("slip", 0), tele.get("pl", 0)
             new_delta = tele.get("d", 0.0)
 
+            # delta bar
             if last_data_time != 0:
                 diff = last_delta - new_delta
-                if abs(diff) < 0.1:
-                    smoothed_change = (smoothed_change * alpha) + (diff * (1.0 - alpha))
+                if abs(diff) < 0.2:
+                    delta_history.append(diff)
+                    if len(delta_history) > 15:
+                        delta_history.pop(0)
             
             last_delta = new_delta
             current_delta = new_delta
@@ -145,12 +147,23 @@ while running:
 
         # delta change bar indicator
         bar_h = int(12 * H_SCALE)
-        bar_w = int(max(-WIDTH // 2, min(WIDTH // 2, smoothed_change * 15000 * W_SCALE)))
         
-        if bar_w > 0: # gaining time
-            pygame.draw.rect(screen, (0, 200, 0), (WIDTH // 2, HEIGHT - bar_h, bar_w, bar_h))
-        elif bar_w < 0: # losing time
-            pygame.draw.rect(screen, (200, 0, 0), (WIDTH // 2 + bar_w, HEIGHT - bar_h, abs(bar_w), bar_h))
+        # using buffer average for change in delta
+        if delta_history:
+            avg_diff = sum(delta_history) / len(delta_history)
+            target_width = avg_diff * 25000 * W_SCALE
+        else:
+            target_width = 0
+
+        # linear interpolation to help reduce flicker
+        visual_bar_width += (target_width - visual_bar_width) * 0.05
+        
+        clamped_w = max(-WIDTH // 2, min(WIDTH // 2, visual_bar_width))
+
+        if clamped_w > 1: # gaining
+            pygame.draw.rect(screen, (0, 200, 0), (WIDTH // 2, HEIGHT - bar_h, clamped_w, bar_h))
+        elif clamped_w < -1: # losing
+            pygame.draw.rect(screen, (200, 0, 0), (WIDTH // 2 + clamped_w, HEIGHT - bar_h, abs(clamped_w), bar_h))
 
         # speed reading
         speed_surf = font_speed.render(last_speed, True, (0, 230, 0) if int(last_speed) > 0 else (120, 120, 120))
