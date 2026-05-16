@@ -6,11 +6,18 @@ import time
 import math
 
 # skeleton keys for R36S - adjust or remove as necessary
-os.environ["SDL_VIDEODRIVER"] = "fbcon"
-os.environ["SDL_FBDEV"] = "/dev/fb0"
-os.environ["SDL_NOMOUSE"] = "1"
-os.environ["SDL_MOUSEDEV"] = "/dev/null"
-os.environ["SDL_MOUSEDRV"] = "dummy"
+# fb0 driver assumes R36S
+if os.path.exists("/dev/fb0"):
+    os.environ["SDL_VIDEODRIVER"] = "fbcon"
+    os.environ["SDL_FBDEV"] = "/dev/fb0"
+    os.environ["SDL_NOMOUSE"] = "1"
+    os.environ["SDL_MOUSEDEV"] = "/dev/null"
+    os.environ["SDL_MOUSEDRV"] = "dummy"
+    cursor_visible = False
+else:
+    # fallback - let pygame assume values
+    cursor_visible = True
+
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
 pygame.init()
