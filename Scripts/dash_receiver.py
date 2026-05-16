@@ -119,6 +119,11 @@ while running:
 
     # handle R36S buttons for exit
     for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
         if event.type == pygame.JOYBUTTONDOWN:
             if event.button == 13: # Start: Exit
                 running = False
