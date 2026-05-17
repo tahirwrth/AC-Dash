@@ -41,6 +41,7 @@ if pygame.joystick.get_count() > 0:
 pygame.mouse.set_visible(False)
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF)
+pygame.display.set_caption("Dashboard")
 clock = pygame.time.Clock()
 
 # typography - font sizes
