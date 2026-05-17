@@ -14,15 +14,15 @@ This project has been catered around the use of a connected R36S linux-based gam
 #### Assetto Corsa Installation
 - Copy `Dashboard` folder into Assetto Corsa's Python App directory. By default this is `C:\Program Files (x86)\Steam\steamapps\common\assettocorsa\apps\python\`
 
-#### Assetto Corsa Setup
-- Open Content Manager
-- Navigate to `SETTINGS -> ASSETTO CORSA -> PYTHON APPS` and ensure the `Enable Python Apps` option is ticked
-- Navigate to `SETTINGS -> ASSETTO CORSA -> PYTHON APP SETTINGS -> Dashboard` and tick the option next to Dashboard. Edit the `Ip address:` field with the address of your device.
-
 #### R36S Device Installation & Setup
 - Connect device to internet, open terminal with a connected keyboard or connect to device via SSH
 - In the terminal, run `curl -sL https://raw.githubusercontent.com/tahirwrth/AC-Dash/main/install.sh | bash`
 - Restart your device
+
+#### Assetto Corsa Setup
+- Open Content Manager
+- Navigate to `SETTINGS -> ASSETTO CORSA -> PYTHON APPS` and ensure the `Enable Python Apps` option is ticked
+- Navigate to `SETTINGS -> ASSETTO CORSA -> PYTHON APP SETTINGS -> Dashboard` and tick the option next to Dashboard. Edit the `Ip address:` field with the address of your device.
 
 ### Usage Instructions
 - Power on R36S device and connect to the network using Wi-Fi or USB tethering
