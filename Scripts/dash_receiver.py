@@ -42,6 +42,8 @@ pygame.mouse.set_visible(False)
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF)
 pygame.display.set_caption("Dashboard")
+icon = pygame.image.load('icon.png')
+pygame.display.set_icon(icon)
 clock = pygame.time.Clock()
 
 # typography - font sizes
