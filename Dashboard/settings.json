@@ -5,7 +5,7 @@
       {
         "title": "Device",
         "settings": [
-          { "id": "IP_ADDRESS", "name": "Device IP Address", "type": "string", "default": "127.0.0.0" }
+          { "id": "IP_ADDRESS", "name": "Device IP Address", "type": "string", "default": "127.0.0.1" }
         ]
       }
     ]
